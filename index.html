@@ -845,9 +845,62 @@
         right: 20px;
       }
     }
+    .loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #0a0a0a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  transition: opacity 0.5s ease;
+}
+
+.loading-content {
+  text-align: center;
+  max-width: 300px;
+}
+
+.loading-animation {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 20px;
+}
+
+.progress-container {
+  width: 100%;
+  height: 8px;
+  border: 0.2px solid rgb(0, 255, 0);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--primary-color);
+  transition: width 2s linear;
+}
+
+body.loaded .loading-screen {
+  opacity: 0;
+  pointer-events: none;
+}
   </style>
 </head>
 <body>
+  <div class="loading-screen">
+  <div class="loading-content">
+    <img src="favicon.png" alt="Loading..." class="loading-animation">
+    <div class="progress-container">
+      <div class="progress-bar"></div>
+    </div>
+  </div>
+</div>
   <header id="header">
     <div class="logo">AFIF</div>
     <nav>
@@ -872,7 +925,7 @@
   <!-- Home Section -->
   <section id="home" class="hero">
     <div class="text-content">
-      <h1>Hi,<br> I'm <span class="highlight">AFIF</span><br> Tactical Web Developer</h1>
+      <h1>Hi,<br> I'm <span class="highlight">AFIF</span><br> Tactical Web Designer</h1>
       <p class="bio">I craft immersive and responsive web experiences with a strong focus on design, performance, and usability. Whether it's building sleek personal websites or tactical UI systems, I deliver digital solutions that stand out.</p>
       <button class="contact-btn" onclick="scrollToSection('contact')">Contact</button>
       <div class="social-icons">
@@ -1331,6 +1384,53 @@ document.addEventListener('keydown', function(e) {
 // Disable text selection (optional)
 document.addEventListener('selectstart', function(e) {
   e.preventDefault();
+});
+
+// Loading animation
+document.addEventListener('DOMContentLoaded', function() {
+  const loadingScreen = document.querySelector('.loading-screen');
+  const progressBar = document.querySelector('.progress-bar');
+  
+  // Start progress bar animation
+  progressBar.style.width = '100%';
+  
+  // Preload all images
+  const images = document.querySelectorAll('img');
+  let imagesLoaded = 0;
+  const totalImages = images.length;
+  
+  if (totalImages === 0) {
+    allContentLoaded();
+  }
+  
+  images.forEach(img => {
+    if (img.complete) {
+      imageLoaded();
+    } else {
+      img.addEventListener('load', imageLoaded);
+      img.addEventListener('error', imageLoaded); // Count even if error
+    }
+  });
+  
+  function imageLoaded() {
+    imagesLoaded++;
+    if (imagesLoaded === totalImages) {
+      allContentLoaded();
+    }
+  }
+  
+  function allContentLoaded() {
+    // Ensure minimum 2s display time
+    const minDisplayTime = 2000;
+    const startTime = Date.now();
+    
+    setTimeout(() => {
+      document.body.classList.add('loaded');
+      setTimeout(() => {
+        loadingScreen.remove();
+      }, 500); // Match CSS transition time
+    }, Math.max(0, minDisplayTime - (Date.now() - startTime)));
+  }
 });
 
     window.addEventListener('scroll', animateOnScroll);
